@@ -3,6 +3,7 @@ import json
 
 
 class FileManager:
+    # TODO add sequence number, count of pushed objects
 
     def __init__(self):
         self.log_idx = 0 # index of last log file created
@@ -21,7 +22,7 @@ class FileManager:
             print(f'unable to read from file due to exception:\n{e}')
         if len(lines) == 0:
             return None
-        return lines[-1]
+        return json.loads(lines[-1])
         
 
     def write(self, obj):
