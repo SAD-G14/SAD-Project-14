@@ -11,9 +11,18 @@ class FileManager:
             log_file.write('')
 
     def read(self):
-        if len(self.cache[0]) == 0: # nothing to read
-            return None 
-        message = self.cache.pop()
+        try:
+            with open('yourfile.txt', 'r+') as log_file:
+                lines = log_file.readlines()
+                log_file.seek(0)
+                log_file.truncate()
+                last_line = log_file.writelines(lines[:-1])
+        except Exception as e:
+            print(f'unable to read from file due to exception:\n{e}')
+        if len(lines) == 0:
+            return None
+        return lines[-1]
+        
 
     def write(self, obj):
         object_json = json.dumps(obj)
