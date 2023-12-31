@@ -17,7 +17,7 @@ def post_data():
 
 @app.route('/health', methods=['GET'])
 def get_data():
-    data = {'server is up and running'}
+    data = 'server is up and running'
     return jsonify(data), 200
 
 
