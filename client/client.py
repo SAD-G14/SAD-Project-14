@@ -11,7 +11,7 @@ class Client:
         self.socket.connect((host, port))
         return
 
-    def push(self, key: str, value: bytes) -> None:
+    def push(self, key: str, value: bytes) -> str:
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
         data = {key: value.decode()}  # Convert bytes to string
@@ -20,7 +20,7 @@ class Client:
         try:
             response = requests.post(url, data=json_data, headers=headers)
             response.raise_for_status()
-            print(response.text)
+            return response.text
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
 
