@@ -26,7 +26,7 @@ class Client:
 
     def pull(self) -> Tuple[str, bytes]:
         # url = f"http://{self.host}:{self.port}/health"
-        url = "http://127.0.0.1:5000/health"
+        url = "http://127.0.0.1:5000/queue/pull"
         try:
             response = requests.get(url)
             response.raise_for_status()
