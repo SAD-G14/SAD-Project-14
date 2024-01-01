@@ -16,3 +16,15 @@ class Message:
         return Message(
             message.key, message.value, message.date, message.producer_id, None
         )
+
+    #Object of type Message is not JSON serializable
+    def serialize(self):
+        return {
+            'key': self.key,
+            'value': self.value,
+            'date': self.date,
+            'producer_id': self.producer_id,
+            'sequence_number': self.sequence_number,
+            'hidden': self.hidden,
+            'hidden_until': self.hidden_until
+        }
