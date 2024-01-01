@@ -3,9 +3,9 @@ import json
 
 
 class FileManager:
-    # TODO add sequence number, count of pushed objects
 
     def __init__(self):
+        self.pushed_objects_count = 0
         self.log_idx = 0 # index of last log file created
         self.log_dir = 'logs'
         os.makedirs(self.log_dir, exist_ok=True)
@@ -32,6 +32,7 @@ class FileManager:
         try:
             with open(self.last_log, 'a') as log_file:
                 log_file.write(f'\n{object_json}')
+            self.pushed_objects_count += 1
         except Exception as e:
             print(f'unable to write due to exception:\n{e}')
             
