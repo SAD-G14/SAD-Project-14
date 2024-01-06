@@ -37,7 +37,8 @@ class FileManager:
             print(f'unable to write due to exception:\n{e}')
             
 
-if __name__ == '__main__':
+# todo: move this to the tests
+def test_case():
     filemanager = FileManager()
     print(filemanager.read())
 
