@@ -17,3 +17,14 @@ def pull():
     message.hidden = True
     db.write(message)
     return message.serialize()
+
+def ack(producer_id: int, sequence_number: int) -> dict:
+   # Find the message in the queue and mark it as acknowledged
+   # This depends on how your messages are stored in the queue
+   message = find_message_in_queue(producer_id, sequence_number) # TODO find message in queue
+   if message:
+       message.acknowledged = True
+       return {'status': 'success'}
+   else:
+       return {'status': 'failure'}
+
