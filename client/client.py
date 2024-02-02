@@ -10,12 +10,14 @@ class Client:
     def __init__(self, host: str, port: int) -> None:
         self.socket = socket.socket()
         self.socket.connect((host, port))
+        self.sequence_number = 0
         return
 
     def push(self, key: str, value: bytes) -> str:
+        self.sequence_number += 1
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
-        data = {key: value.decode()}  # Convert bytes to string
+        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number}
         headers = {'Content-Type': 'application/json'}
         json_data = json.dumps(data)
         try:
