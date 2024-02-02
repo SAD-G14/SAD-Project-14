@@ -27,5 +27,14 @@ def health():
     return jsonify(data), 200
 
 
+@app.route('/queue/ack', methods=['POST'])
+def ack():
+   data = request.get_json()
+   producer_id = data['producer_id']
+   sequence_number = data['sequence_number']
+   response = broker.ack(producer_id, sequence_number)
+   return jsonify(response), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
