@@ -1,4 +1,5 @@
 import socket
+import time
 from typing import Callable
 import requests
 import json
@@ -11,13 +12,14 @@ class Client:
         self.socket = socket.socket()
         self.socket.connect((host, port))
         self.sequence_number = 0
+        self.producer_id = int(round(time.time() * 1000)) # Todo: server should determine pID
         return
 
     def push(self, key: str, value: bytes) -> str:
         self.sequence_number += 1
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
-        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number}
+        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number, 'producer_id': self.producer_id}
         headers = {'Content-Type': 'application/json'}
         json_data = json.dumps(data)
         try:

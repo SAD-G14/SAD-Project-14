@@ -1,8 +1,9 @@
 from broker.data import message_request as MessageData
 from broker.model.message import Message as MessageModel
 from broker.application.interfaces import DB
+from broker.filemanager import FileManager
 
-db = DB()
+db = FileManager()
 
 
 def push(message_data: MessageData) -> dict:

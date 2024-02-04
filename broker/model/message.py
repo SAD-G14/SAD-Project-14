@@ -14,7 +14,7 @@ class Message:
 
     def from_data(message: MessageRequest):  # static method (ignore pyCharm warning about this)
         return Message(
-            message.key, message.value, message.date, message.producer_id, None
+            message.key, message.value, message.date, message.producer_id, message.sequence_number
         )
 
     #Object of type Message is not JSON serializable
