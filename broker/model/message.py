@@ -17,7 +17,7 @@ class Message:
             message.key, message.value, message.date, message.producer_id, message.sequence_number
         )
 
-    #Object of type Message is not JSON serializable
+    # Object of type Message is not JSON serializable
     def serialize(self):
         return {
             'key': self.key,

@@ -12,7 +12,7 @@ class Client:
         self.socket = socket.socket()
         self.socket.connect((host, port))
         self.sequence_number = 0
-        self.producer_id = int(round(time.time() * 1000)) # Todo: server should determine pID
+        self.producer_id = int(round(time.time() * 1000))  # Todo: server should determine pID
         return
 
     def push(self, key: str, value: bytes) -> str:
