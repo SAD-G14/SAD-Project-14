@@ -33,7 +33,7 @@ class FileManager:
             with open(self.last_log, 'a') as log_file:
                 log_file.write(f'\n{object_json}')
             self.pushed_objects_count += 1
-            return object_json
+            return obj
         except Exception as e:
             print(f'unable to write due to exception:\n{e}')
             

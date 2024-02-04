@@ -6,5 +6,5 @@ class MessageRequest:
         self.producer_id = producer_id
         self.sequence_number = sequence_number
 
-    def __str__(self):
-        return f'key: {self.key}, value: {self.value}, date: {self.date}, producer_id: {self.producer_id}'
+    def str(self):
+        return f"key: {self.key}, value: {self.value}, date: {self.date}, producer_id: {self.producer_id}, sequence_number: {self.sequence_number}"
