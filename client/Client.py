@@ -1,4 +1,5 @@
 import socket
+import time
 from typing import Callable
 import requests
 import json
@@ -9,12 +10,13 @@ class Client:
     def __init__(self, host: str, port: int) -> None:
         self.socket = socket.socket()
         self.socket.connect((host, port))
+        self.producer_id = int(round(time.time() * 1000)) # Todo: server should determine pID
         return
 
     def push(self, key: str, value: bytes) -> str:
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
-        data = {key: value.decode()}  # Convert bytes to string
+        data = {'key': key, 'value': value.decode(), 'producer_id': self.producer_id}  # Convert bytes to string
         headers = {'Content-Type': 'application/json'}
         json_data = json.dumps(data)
         try:
