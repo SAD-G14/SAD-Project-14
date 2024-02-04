@@ -1,5 +1,6 @@
 from time import time
 from flask import Flask, request, jsonify
+import logging
 
 from broker.data.message_request import MessageRequest
 from broker.application import broker
@@ -9,6 +10,7 @@ app = Flask(__name__)
 
 @app.route('/queue/push', methods=['POST'])
 def push():
+    logging.info("POST /queue/push with data: {}".format(request.get_json()))
     data = request.get_json()
     message_request = MessageRequest(data['key'], data['value'], int(time()), data['producer_id'], data['sequence_number'])
     response = broker.push(message_request)
