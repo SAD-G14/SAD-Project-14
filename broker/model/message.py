@@ -11,6 +11,7 @@ class Message:
         self.sequence_number = sequence_number
         self.hidden = hidden
         self.hidden_until = hidden_until
+        self.acknowledged = False
 
     def from_data(message: MessageRequest):  # static method (ignore pyCharm warning about this)
         return Message(
