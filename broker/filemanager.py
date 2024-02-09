@@ -18,6 +18,7 @@ class FileManager:
             with open(self.last_log, 'r+') as log_file:
                 lines = log_file.readlines()
                 log_file.seek(0)
+                log_file.writelines(lines[:-1])
                 log_file.truncate()
                 # todo: unused variable: last_line = log_file.writelines(lines[:-1])
         except Exception as e:
