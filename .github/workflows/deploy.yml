@@ -3,6 +3,8 @@ name: Deploy
 on:
   push:
     branches: [ main ]
+  pull_request:
+      branches: [ main ]
 
 jobs:
   build:
@@ -17,6 +19,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          ls
           cd /sad/SAD-Project-14
           git pull origin main
           git status
