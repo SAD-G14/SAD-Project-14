@@ -1,0 +1,83 @@
+import unittest
+
+from broker.application import broker
+from broker.model import message
+from broker import FilaManager
+
+
+class TestClient(unittest.TestCase):
+    def test_add_positive_numbers(self):
+        message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
+                                                 producer_id=1707058229693, sequence_number=1)
+        written_message = broker.push(message_request)
+        print(written_message)
+        self.assertTrue(True)
+
+
+    def test_push_and_pull(self):
+        message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
+                                                 producer_id=1707058229693, sequence_number=1)
+        written_message = broker.push(message_request)
+        pulled_message = broker.pull()
+        self.assertEqual(message_request.serialize(), pulled_message)
+
+    def test_ack_successful(self):
+        message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
+                                                 producer_id=1707058229693, sequence_number=1)
+        written_message = broker.push(message_request)
+        self.assertTrue(broker.ack(1707058229693, 1))
+
+    def test_ack_unsuccessful(self):
+        message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
+                                                 producer_id=1707058229693, sequence_number=1)
+        written_message = broker.push(message_request)
+        self.assertTrue(broker.ack(1707058229693, 2))
+
+
+class TestFileManager(unittest.TestCase):
+    def test_filemanager_read_write(self):
+        filemanager = FileManager()
+        self.assertEqual(filemanager.read(), None)
+
+        class DummyClass:
+            def __init__(self, var1, var2):
+                self.var1 = var1
+                self.var2 = var2
+
+        obj1 = DummyClass(1, 2)
+        obj2 = DummyClass(3, 4)
+        obj3 = DummyClass(5, 6)
+        filemanager.write(obj1)
+        self.assertEqual(filemanager.read(), json.dumps(obj1, default=vars))
+        filemanager.write(obj2)
+        filemanager.write(obj3)
+        self.assertEqual(filemanager.read(), obj3)
+        self.assertEqual(filemanager.read(), obj2)
+
+    def test_filemanager_find_in_queue(self):
+        class Message():
+            def __init__(self, producer_id, sequence_number):
+                self.producer_id = producer_id
+                self.sequence_number = sequence_number
+
+            def serialize(self):
+                return {
+                'producer_id': self.producer_id,
+                'sequence_number': self.sequence_number
+                }
+
+        filemanager = FileManager()
+        message = Message(1, 1)
+        filemanager.write(message)
+        filemanager.write(message)
+        message.producer_id = 2
+        filemanager.write(message)
+        message.sequence_number = 2
+        filemanager.write(message)
+        message.producer_id = 1
+        filemanager.write(message)
+        message.sequence_number = 1
+        self.assertEqual(filemanager.find_message_in_queue(1, 1), [message.serialize() for _ in range(2)])
+
+if __name__ == '__main__':
+    unittest.main()

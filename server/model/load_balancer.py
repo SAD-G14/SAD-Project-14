@@ -1,19 +1,24 @@
+from uhashring import HashRing
+
+
 class LoadBalancer:
     def __init__(self):
-        pass
+        self.node_index = 0
+        self.nodes = ['node1']
+        self.hr = HashRing(nodes=self.nodes)
 
     def add_node(self, node):
-        # use this in case of adding a new node
-        pass
+        self.nodes.append(node)
+        self.hr.add_node(node)
 
     def remove_node(self, node):
-        # I hope we don't have to use this
-        pass
+        self.hr.remove_node(node)
+        self.nodes.remove(node)
 
     def get_node_from_key(self, key):
-        # note: when pushing from clients, we can use consistent hashing
-        pass
+        return self.hr.get(key)
 
     def get_rr_node(self):
-        # note: when pulling from brokers, we can use round robin
-        pass
+        node = self.nodes[self.node_index % len(self.nodes)]
+        self.node_index = (self.node_index + 1) % len(self.nodes)
+        return node
