@@ -1,8 +1,13 @@
+import os
 import unittest
 
+# from flask import json
+import json
 from broker.application import broker
 from broker.model import message
-from broker import FilaManager
+from broker.filemanager import FileManager
+from broker.model.message import Message
+from broker.data.message_request import MessageRequest
 
 
 class TestClient(unittest.TestCase):
@@ -12,7 +17,6 @@ class TestClient(unittest.TestCase):
         written_message = broker.push(message_request)
         print(written_message)
         self.assertTrue(True)
-
 
     def test_push_and_pull(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
@@ -62,8 +66,8 @@ class TestFileManager(unittest.TestCase):
 
             def serialize(self):
                 return {
-                'producer_id': self.producer_id,
-                'sequence_number': self.sequence_number
+                    'producer_id': self.producer_id,
+                    'sequence_number': self.sequence_number
                 }
 
         filemanager = FileManager()
@@ -78,6 +82,21 @@ class TestFileManager(unittest.TestCase):
         filemanager.write(message)
         message.sequence_number = 1
         self.assertEqual(filemanager.find_message_in_queue(1, 1), [message.serialize() for _ in range(2)])
+
+    def test_find_message_not_in_queue(self):
+        filemanager = FileManager()
+        message = {
+            'producer_id': 1,
+            'sequence_number': 1,
+            'key': 'Ali',
+            'value': 'New message',
+            'date': 2024,
+            'hidden': False
+        }
+        filemanager.write(message)
+        found_messages = filemanager.find_message_in_queue(2, 1)
+        self.assertEqual(len(found_messages), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
