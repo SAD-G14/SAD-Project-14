@@ -25,4 +25,4 @@ jobs:
           git pull origin main
           git status
           docker build . --file ./broker/Dockerfile --tag my-image-name:$(date +%s) 
-          docker compose up
+          docker compose up -d
