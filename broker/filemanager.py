@@ -42,7 +42,6 @@ class FileManager:
         try:
             with open(self.last_log, 'r') as log_file:
                 lines = log_file.readlines()
-                # todo: unused variable: last_line = log_file.writelines(lines[:-1])
         except Exception as e:
             print(f'unable to read from file due to exception:\n{e}')
             return None
