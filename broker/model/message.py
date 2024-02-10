@@ -27,5 +27,6 @@ class Message:
             'producer_id': self.producer_id,
             'sequence_number': self.sequence_number,
             'hidden': self.hidden,
-            'hidden_until': self.hidden_until
+            'hidden_until': self.hidden_until,
+            'acknowledged': self.acknowledged
         }

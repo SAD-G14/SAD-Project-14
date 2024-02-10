@@ -236,5 +236,22 @@ class TestMessageRequest(unittest.TestCase):
         self.assertEqual(message_request.sequence_number, 1)
 
 
+class TestMessage(unittest.TestCase):
+    def test_message_creation_and_serialization(self):
+        message = Message('key', 'value', 123456789, 1, 1)
+        serialized_message = message.serialize()
+        expected_serialization = {
+            'key': 'key',
+            'value': 'value',
+            'date': 123456789,
+            'producer_id': 1,
+            'sequence_number': 1,
+            'hidden': False,
+            'hidden_until': 0,
+            'acknowledged': False
+        }
+        self.assertEqual(serialized_message, expected_serialization)
+
+
 if __name__ == '__main__':
     unittest.main()
