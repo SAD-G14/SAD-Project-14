@@ -193,16 +193,16 @@ class TestBroker(unittest.TestCase):
         produced_sorted = sorted(self.produced_messages, key=lambda x: (x['producer_id'], x['sequence_number']))
         consumed_sorted = sorted(self.consumed_messages, key=lambda x: (x['producer_id'], x['sequence_number']))
         #
-        # for produced, consumed in zip(produced_sorted, consumed_sorted):
-        #     self.assertEqual(produced, consumed, "Mismatch between produced and consumed messages.")
+        for produced, consumed in zip(produced_sorted, consumed_sorted):
+            self.assertEqual(produced, consumed, "Mismatch between produced and consumed messages.")
 
-        produced_keys = [msg['key'] for msg in produced_sorted]
-        consumed_keys = [msg['key'] for msg in consumed_sorted]
-
-        produced_counter = Counter(produced_keys)
-        consumed_counter = Counter(consumed_keys)
-
-        self.assertEqual(produced_counter, consumed_counter, "Mismatch between produced and consumed messages counts.")
+        # produced_keys = [msg['key'] for msg in produced_sorted]
+        # consumed_keys = [msg['key'] for msg in consumed_sorted]
+        #
+        # produced_counter = Counter(produced_keys)
+        # consumed_counter = Counter(consumed_keys)
+        #
+        # self.assertEqual(produced_counter, consumed_counter, "Mismatch between produced and consumed messages counts.")
 
 
 class TestBroker2(unittest.TestCase):
@@ -210,8 +210,19 @@ class TestBroker2(unittest.TestCase):
     def setUp(self):
         self.file_manager = FileManager()
 
+    # NOT WORKING
+    def test_acknowledgement(self):
+        message_request = MessageRequest('testKey', 'testValue', 123456789, 1, 1)
+        push(message_request)
+        pulled_message = pull()
+
+        ack_response = ack(pulled_message['producer_id'], pulled_message['sequence_number'])
+        self.assertTrue(ack_response['status'], 'success')
+
+        self.assertIsNone(pull())
+
     def test_acknowledge_nonexistent_message(self):
-        ack_response = ack(999, 999)  # Using unlikely producer_id and sequence_number
+        ack_response = ack(999, 999)
         self.assertEqual(ack_response['status'], 'failure')
 
 
