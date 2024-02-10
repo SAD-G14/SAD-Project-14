@@ -1,5 +1,6 @@
 import os
 import json
+import datetime
 
 
 class FileManager:
@@ -19,10 +20,19 @@ class FileManager:
                 lines = log_file.readlines()
                 if not lines:  # Check if there are no lines to read
                     return None
-                oldest_message = lines[0]  # The first line is the oldest
-                log_file.seek(0)  # Go back to the start of the file
-                log_file.truncate()  # Truncate the file to remove any leftover content
-                log_file.writelines(lines[1:])  # Write back all but the first line
+                # oldest_message = lines[0]  # The first line is the oldest
+                index = 0
+                while (index < len(oldest_message)):
+                    data = json.loads(oldest_message[i])
+                    if (not data.hidden) or hidden_until < datetime.datetime.now():
+                        break
+                    index += 1
+                if index < len(oldest_message):
+                    log_file.seek(0)  # Go back to the start of the file
+                    log_file.truncate()  # Truncate the file to remove any leftover content
+                    log_file.writelines(lines[:index], lines[index + 1:])  # Write back all but the index line
+                    return data
+                return None
         except Exception as e:
             print(f'unable to read from file due to exception:\n{e}')
             return None
