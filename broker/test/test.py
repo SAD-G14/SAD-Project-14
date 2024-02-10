@@ -11,6 +11,7 @@ from broker.model import message
 from broker.filemanager import FileManager
 from broker.model.message import Message
 from broker.data.message_request import MessageRequest
+from broker.application.broker import push, pull, ack
 
 
 class TestClient(unittest.TestCase):
@@ -202,6 +203,16 @@ class TestBroker(unittest.TestCase):
         consumed_counter = Counter(consumed_keys)
 
         self.assertEqual(produced_counter, consumed_counter, "Mismatch between produced and consumed messages counts.")
+
+
+class TestBroker2(unittest.TestCase):
+
+    def setUp(self):
+        self.file_manager = FileManager()
+
+    def test_acknowledge_nonexistent_message(self):
+        ack_response = ack(999, 999)  # Using unlikely producer_id and sequence_number
+        self.assertEqual(ack_response['status'], 'failure')
 
 
 if __name__ == '__main__':
