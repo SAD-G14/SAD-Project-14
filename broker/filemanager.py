@@ -21,8 +21,8 @@ class FileManager:
                     return None
                 oldest_message = lines[0]  # The first line is the oldest
                 log_file.seek(0)  # Go back to the start of the file
-                log_file.writelines(lines[1:])  # Write back all but the first line
                 log_file.truncate()  # Truncate the file to remove any leftover content
+                log_file.writelines(lines[1:])  # Write back all but the first line
         except Exception as e:
             print(f'unable to read from file due to exception:\n{e}')
             return None
