@@ -64,3 +64,5 @@ class Client:
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return str(e), b''
+
+

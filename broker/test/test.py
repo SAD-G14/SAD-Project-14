@@ -3,6 +3,8 @@ import unittest
 
 # from flask import json
 import json
+import threading
+import time
 from broker.application import broker
 from broker.model import message
 from broker.filemanager import FileManager
@@ -133,6 +135,40 @@ class TestFileManager(unittest.TestCase):
         filemanager.write(message)
         found_messages = filemanager.find_message_in_queue(2, 1)
         self.assertEqual(len(found_messages), 0)
+
+
+class TestBroker(unittest.TestCase):
+    def produce_messages(self, producer_id, num_messages):
+        for i in range(num_messages):
+            msg = MessageRequest(f'key_{producer_id}_{i}', f'value_{producer_id}_{i}', int(time.time()), producer_id, i)
+            self.filemanager.write(Message.from_data(msg).serialize())
+
+    def consume_messages(self, num_consumers):
+        consumed = []
+        for _ in range(num_consumers):
+            msg = self.filemanager.read()
+            if msg:
+                consumed.append(msg)
+        return consumed
+
+    def test_multiple_producers_consumers(self):
+        num_producers = 5
+        num_messages = 10
+        num_consumers = 50
+
+        producers = [threading.Thread(target=self.produce_messages, args=(i, num_messages)) for i in
+                     range(num_producers)]
+        for producer in producers:
+            producer.start()
+        for producer in producers:
+            producer.join()
+
+        consumers = [threading.Thread(target=self.consume_messages, args=(num_consumers,)) for _ in
+                     range(num_consumers)]
+        for consumer in consumers:
+            consumer.start()
+        for consumer in consumers:
+            consumer.join()
 
 
 if __name__ == '__main__':
