@@ -270,6 +270,18 @@ class TestFlaskApp(unittest.TestCase):
         self.assertIn('producer_id', response.json)
         self.assertIn('sequence_number', response.json)
 
+    # NOT WORKING
+    def test_pull(self):
+        self.client.post('/queue/push', json={
+            'key': 'key',
+            'value': 'value',
+            'producer_id': 1,
+            'sequence_number': 1
+        })
+        response = self.client.get('/queue/pull')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['key'], 'key')
+
 
 if __name__ == '__main__':
     unittest.main()
