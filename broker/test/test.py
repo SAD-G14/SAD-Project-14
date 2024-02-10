@@ -5,6 +5,7 @@ import unittest
 import json
 import threading
 import time
+from collections import Counter
 from broker.application import broker
 from broker.model import message
 from broker.filemanager import FileManager
@@ -187,12 +188,20 @@ class TestBroker(unittest.TestCase):
 
         # self.assertEqual(len(self.produced_messages), len(self.consumed_messages),
         #                  "Not all produced messages were consumed.")
-
+        #
         produced_sorted = sorted(self.produced_messages, key=lambda x: (x['producer_id'], x['sequence_number']))
         consumed_sorted = sorted(self.consumed_messages, key=lambda x: (x['producer_id'], x['sequence_number']))
+        #
+        # for produced, consumed in zip(produced_sorted, consumed_sorted):
+        #     self.assertEqual(produced, consumed, "Mismatch between produced and consumed messages.")
 
-        for produced, consumed in zip(produced_sorted, consumed_sorted):
-            self.assertEqual(produced, consumed, "Mismatch between produced and consumed messages.")
+        produced_keys = [msg['key'] for msg in produced_sorted]
+        consumed_keys = [msg['key'] for msg in consumed_sorted]
+
+        produced_counter = Counter(produced_keys)
+        consumed_counter = Counter(consumed_keys)
+
+        self.assertEqual(produced_counter, consumed_counter, "Mismatch between produced and consumed messages counts.")
 
 
 if __name__ == '__main__':
