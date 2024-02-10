@@ -7,7 +7,7 @@ class LoadBalancer:
         self.nodes = []
         self.hr = HashRing(nodes=self.nodes)
 
-    def  add_node(self, node):
+    def add_node(self, node):
         print("nodes added")
         self.nodes.append(node)
         self.hr.add_node(node)

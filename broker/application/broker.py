@@ -11,6 +11,7 @@ db = None
 PARTITION = 0
 REPLICA = None
 
+
 def push(message_data: MessageData) -> dict:
     message = MessageModel.from_data(message_data)
     written_message = db.write(message)
@@ -26,7 +27,6 @@ def pull():
 
 
 def ack(producer_id: int, sequence_number: int) -> dict:
-
     # Find the message in the queue and mark it as acknowledged
     # This depends on how your messages are stored in the queue
     message = db.find_message_in_queue(producer_id, sequence_number)  # TODO find message in queue
@@ -35,6 +35,7 @@ def ack(producer_id: int, sequence_number: int) -> dict:
         return {'status': 'success'}
     else:
         return {'status': 'failure'}
+
 
 def join_server():
     while True:
@@ -48,6 +49,7 @@ def join_server():
         except Exception as e:
             logging.warn("could not join server: {}".format(e))
             time.sleep(1)
+
 
 def accept_replica(replica):
     global REPLICA
