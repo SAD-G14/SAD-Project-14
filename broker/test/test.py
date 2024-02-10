@@ -21,9 +21,14 @@ class TestClient(unittest.TestCase):
     def test_push_and_pull(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
                                                  producer_id=1707058229693, sequence_number=1)
-        written_message = broker.push(message_request)
+        expected_message = message_request.serialize()
+        expected_message.update(
+            {'acknowledged': False, 'hidden': True, 'hidden_until': 0})  # Add expected default values
+
+        broker.push(message_request)
         pulled_message = broker.pull()
-        self.assertEqual(message_request.serialize(), pulled_message)
+
+        self.assertEqual(expected_message, pulled_message)
 
     def test_ack_successful(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,

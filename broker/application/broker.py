@@ -14,16 +14,18 @@ def push(message_data: MessageData) -> dict:
 
 def pull():
     message = db.read()
-    message.hidden = True
-    db.write(message)
-    return message.serialize()
+    if message:
+        message['hidden'] = True
+        db.write(message)
+        return message
+    else:
+        return None
 
 
 def ack(producer_id: int, sequence_number: int) -> dict:
     messages = db.find_message_in_queue(producer_id, sequence_number)
     if messages:
         for message in messages:
-            # Use key access instead of attribute access for dictionary
             message['acknowledged'] = True
         return {'status': 'success'}
     else:
