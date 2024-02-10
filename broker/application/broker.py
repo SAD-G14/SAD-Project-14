@@ -20,10 +20,11 @@ def pull():
 
 
 def ack(producer_id: int, sequence_number: int) -> dict:
-    # Find the message in the queue and mark it as acknowledged
-    message = db.find_message_in_queue(producer_id, sequence_number) 
-    if message:
-        message.acknowledged = True
+    messages = db.find_message_in_queue(producer_id, sequence_number)
+    if messages:
+        for message in messages:
+            # Use key access instead of attribute access for dictionary
+            message['acknowledged'] = True
         return {'status': 'success'}
     else:
         return {'status': 'failure'}
