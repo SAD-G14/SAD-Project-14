@@ -282,6 +282,22 @@ class TestFlaskApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['key'], 'key')
 
+    def test_ack(self):
+        # Push a message first
+        self.client.post('/queue/push', json={
+            'key': 'key',
+            'value': 'value',
+            'producer_id': 1,
+            'sequence_number': 1
+        })
+        # Acknowledge the message
+        response = self.client.post('/queue/ack', json={
+            'producer_id': 1,
+            'sequence_number': 1
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['status'], 'success')
+
 
 if __name__ == '__main__':
     unittest.main()
