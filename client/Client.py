@@ -5,14 +5,17 @@ import requests
 import json
 from typing import Tuple
 from retry import retry
+from concurrent.futures import ThreadPoolExecutor
 
+TIME_BETWEEN_PULLS = 1
 
 class Client:
-    def __init__(self, host: str, port: int) -> None:
+    def __init__(self, host: str, port: int, max_worker_threads: int = 1) -> None:
         self.socket = socket.socket()
         self.socket.connect((host, port))
         self.sequence_number = 0
         self.producer_id = int(round(time.time() * 1000))  # Todo: server should determine pID
+        self.thread_pool = ThreadPoolExecutor(max_workers=max_worker_threads)
         return
 
     def push(self, key: str, value: bytes) -> str:
@@ -40,7 +43,15 @@ class Client:
             return str(e), b''
 
     def subscribe(self, f: Callable[[str, bytes], None]) -> None:
-        pass
+        self.thread_pool.submit(self.consumer_function, args=(f))
+        return
+
+    def consumer_function(self, f: Callable[[str, bytes], None]) -> None:
+        while(True):
+            time.sleep(TIME_BETWEEN_PULLS)
+            key, value = self.pull()
+            f(key, value)
+        return
 
     @retry(requests.exceptions.RequestException, tries=5, delay=2, backoff=2)
     def send_ack(self, producer_id: int, sequence_number: int) -> None:
