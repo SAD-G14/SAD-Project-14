@@ -7,6 +7,7 @@ import threading
 import time
 from collections import Counter
 from broker.application import broker
+from broker.main import app
 from broker.model import message
 from broker.filemanager import FileManager
 from broker.model.message import Message
@@ -251,6 +252,23 @@ class TestMessage(unittest.TestCase):
             'acknowledged': False
         }
         self.assertEqual(serialized_message, expected_serialization)
+
+
+class TestFlaskApp(unittest.TestCase):
+    def setUp(self):
+        app.testing = True
+        self.client = app.test_client()
+
+    def test_push(self):
+        response = self.client.post('/queue/push', json={
+            'key': 'key',
+            'value': 'value',
+            'producer_id': 1,
+            'sequence_number': 1
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('producer_id', response.json)
+        self.assertIn('sequence_number', response.json)
 
 
 if __name__ == '__main__':
