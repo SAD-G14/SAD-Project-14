@@ -22,15 +22,15 @@ class FileManager:
                     return None
                 # oldest_message = lines[0]  # The first line is the oldest
                 index = 0
-                while (index < len(oldest_message)):
-                    data = json.loads(oldest_message[i])
-                    if (not data.hidden) or hidden_until < datetime.datetime.now():
+                while (index < len(lines)):
+                    data = json.loads(lines[index])
+                    if (not data['hidden']) or data['hidden_until'] < datetime.datetime.now():
                         break
                     index += 1
-                if index < len(oldest_message):
+                if index < len(lines):
                     log_file.seek(0)  # Go back to the start of the file
                     log_file.truncate()  # Truncate the file to remove any leftover content
-                    log_file.writelines(lines[:index], lines[index + 1:])  # Write back all but the index line
+                    log_file.writelines(lines[:index] + lines[index + 1:])  # Write back all but the index line
                     return data
                 return None
         except Exception as e:
