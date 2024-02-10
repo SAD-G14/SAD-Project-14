@@ -1,6 +1,4 @@
 import unittest
-import requests
-
 from client.client import Client
 
 
@@ -15,6 +13,7 @@ class TestClient(unittest.TestCase):
         c.subscribe(print)
         while True:
             pass
+
 
 if __name__ == '__main__':
     unittest.main()

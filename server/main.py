@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 
 from application.application import Application
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 application = Application()
 
@@ -26,5 +29,13 @@ def health():
     return jsonify(data), 200
 
 
+@app.route('/join', methods=['GET'])
+def join():
+    address = request.remote_addr
+    broker = application.join(address)
+    return jsonify({'broker': broker}), 200
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    logging.info("server is up")
+    app.run(host='0.0.0.0', port=4000, debug=True)
