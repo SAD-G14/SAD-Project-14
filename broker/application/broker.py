@@ -2,6 +2,8 @@ from broker.data import message_request as MessageData
 from broker.filemanager import FileManager
 from broker.model.message import Message as MessageModel
 
+import datetime
+
 db = FileManager()
 
 
@@ -16,6 +18,7 @@ def pull():
     message = db.read()
     if message:
         message['hidden'] = True
+        message['hidden_unitl'] = datetime.datetime.now() + datetime.timedelta(seconds=30)
         db.write(message)
         return message
     else:
