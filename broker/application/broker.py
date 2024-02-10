@@ -7,7 +7,8 @@ from broker.data import message_request as MessageData
 from broker.filemanager import FileManager
 from broker.model.message import Message as MessageModel
 
-db = None
+# needed for a test case, should clean it later
+db = FileManager(99, 99)
 PARTITION = 0
 REPLICA = None
 
