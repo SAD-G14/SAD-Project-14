@@ -137,24 +137,39 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(len(found_messages), 0)
 
 
+# NOT WORKING
 class TestBroker(unittest.TestCase):
+    def setUp(self):
+        self.filemanager = FileManager()
+        self.produced_messages = []
+        self.consumed_messages = []
+        self.lock = threading.Lock()
+
     def produce_messages(self, producer_id, num_messages):
+        local_produced = []
         for i in range(num_messages):
             msg = MessageRequest(f'key_{producer_id}_{i}', f'value_{producer_id}_{i}', int(time.time()), producer_id, i)
-            self.filemanager.write(Message.from_data(msg).serialize())
+            serialized_msg = Message.from_data(msg).serialize()
+            self.filemanager.write(serialized_msg)
+            local_produced.append(serialized_msg)
+
+        with self.lock:
+            self.produced_messages.extend(local_produced)
 
     def consume_messages(self, num_consumers):
-        consumed = []
+        local_consumed = []
         for _ in range(num_consumers):
             msg = self.filemanager.read()
             if msg:
-                consumed.append(msg)
-        return consumed
+                local_consumed.append(msg)
+
+        with self.lock:
+            self.consumed_messages.extend(local_consumed)
 
     def test_multiple_producers_consumers(self):
         num_producers = 5
         num_messages = 10
-        num_consumers = 50
+        num_consumers = num_producers * num_messages
 
         producers = [threading.Thread(target=self.produce_messages, args=(i, num_messages)) for i in
                      range(num_producers)]
@@ -169,6 +184,15 @@ class TestBroker(unittest.TestCase):
             consumer.start()
         for consumer in consumers:
             consumer.join()
+
+        # self.assertEqual(len(self.produced_messages), len(self.consumed_messages),
+        #                  "Not all produced messages were consumed.")
+
+        produced_sorted = sorted(self.produced_messages, key=lambda x: (x['producer_id'], x['sequence_number']))
+        consumed_sorted = sorted(self.consumed_messages, key=lambda x: (x['producer_id'], x['sequence_number']))
+
+        for produced, consumed in zip(produced_sorted, consumed_sorted):
+            self.assertEqual(produced, consumed, "Mismatch between produced and consumed messages.")
 
 
 if __name__ == '__main__':
