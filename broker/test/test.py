@@ -226,5 +226,15 @@ class TestBroker2(unittest.TestCase):
         self.assertEqual(ack_response['status'], 'failure')
 
 
+class TestMessageRequest(unittest.TestCase):
+    def test_message_request_creation(self):
+        message_request = MessageRequest('key', 'value', 123456789, 1, 1)
+        self.assertEqual(message_request.key, 'key')
+        self.assertEqual(message_request.value, 'value')
+        self.assertEqual(message_request.date, 123456789)
+        self.assertEqual(message_request.producer_id, 1)
+        self.assertEqual(message_request.sequence_number, 1)
+
+
 if __name__ == '__main__':
     unittest.main()
