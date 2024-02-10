@@ -17,16 +17,16 @@ class FileManager:
         try:
             with open(self.last_log, 'r+') as log_file:
                 lines = log_file.readlines()
-                log_file.seek(0)
-                log_file.writelines(lines[:-1])
-                log_file.truncate()
-                # todo: unused variable: last_line = log_file.writelines(lines[:-1])
+                if not lines:  # Check if there are no lines to read
+                    return None
+                oldest_message = lines[0]  # The first line is the oldest
+                log_file.seek(0)  # Go back to the start of the file
+                log_file.writelines(lines[1:])  # Write back all but the first line
+                log_file.truncate()  # Truncate the file to remove any leftover content
         except Exception as e:
             print(f'unable to read from file due to exception:\n{e}')
             return None
-        if len(lines) == 0:
-            return None
-        return json.loads(lines[-1])
+        return json.loads(oldest_message)
 
     def write(self, obj):
         object_json = json.dumps(obj, default=vars)

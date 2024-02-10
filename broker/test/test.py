@@ -42,6 +42,26 @@ class TestClient(unittest.TestCase):
         written_message = broker.push(message_request)
         self.assertTrue(broker.ack(1707058229693, 2))
 
+    def test_multiple_push_and_pull(self):
+        messages = [
+            message.MessageRequest(key='test1', value='testValue1', date=1707058229, producer_id=1707058229693,
+                                   sequence_number=1),
+            message.MessageRequest(key='test2', value='testValue2', date=1707058230, producer_id=1707058229694,
+                                   sequence_number=2),
+            message.MessageRequest(key='test3', value='testValue3', date=1707058231, producer_id=1707058229695,
+                                   sequence_number=3),
+        ]
+
+        for msg in messages:
+            broker.push(msg)
+
+        for expected_msg in messages:
+            pulled_msg = broker.pull()
+            relevant_pulled_msg = {k: pulled_msg[k] for k in expected_msg.serialize()}
+            self.assertEqual(expected_msg.serialize(), relevant_pulled_msg)
+
+        self.assertIsNone(broker.pull())
+
 
 class TestFileManager(unittest.TestCase):
     def test_filemanager_read_write(self):
