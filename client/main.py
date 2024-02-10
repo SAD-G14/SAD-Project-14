@@ -1,4 +1,4 @@
-from client.Client import Client
+from client.client import Client
 
 
 def send_test_message():

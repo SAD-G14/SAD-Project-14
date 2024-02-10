@@ -1,21 +1,19 @@
-import socket
+import threading
 import time
-from typing import Callable
 import requests
 import json
-from typing import Tuple
+from typing import Tuple, Callable
 from retry import retry
-from concurrent.futures import ThreadPoolExecutor
 
 TIME_BETWEEN_PULLS = 1
 
+
 class Client:
-    def __init__(self, host: str, port: int, max_worker_threads: int = 1) -> None:
-        self.socket = socket.socket()
-        self.socket.connect((host, port))
+    def __init__(self, host: str, port: int) -> None:
+        # self.socket = socket.socket()
+        # self.socket.connect((host, port))
         self.sequence_number = 0
         self.producer_id = int(round(time.time() * 1000))  # Todo: server should determine pID
-        self.thread_pool = ThreadPoolExecutor(max_workers=max_worker_threads)
         return
 
     def push(self, key: str, value: bytes) -> str:
@@ -43,11 +41,11 @@ class Client:
             return str(e), b''
 
     def subscribe(self, f: Callable[[str, bytes], None]) -> None:
-        self.thread_pool.submit(self.consumer_function, args=(f))
+        threading.Thread(target=self.consumer_function, args=(f,)).start()
         return
 
     def consumer_function(self, f: Callable[[str, bytes], None]) -> None:
-        while(True):
+        while True:
             time.sleep(TIME_BETWEEN_PULLS)
             key, value = self.pull()
             f(key, value)
