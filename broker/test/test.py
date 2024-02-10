@@ -76,12 +76,24 @@ class TestFileManager(unittest.TestCase):
         obj1 = DummyClass(1, 2)
         obj2 = DummyClass(3, 4)
         obj3 = DummyClass(5, 6)
+
         filemanager.write(obj1)
-        self.assertEqual(filemanager.read(), json.dumps(obj1, default=vars))
+        read_obj1 = filemanager.read()
+        expected_obj1 = {'var1': 1,
+                         'var2': 2}
+        self.assertEqual(read_obj1, expected_obj1)
+
         filemanager.write(obj2)
         filemanager.write(obj3)
-        self.assertEqual(filemanager.read(), obj3)
-        self.assertEqual(filemanager.read(), obj2)
+        read_obj2 = filemanager.read()
+        expected_obj2 = {'var1': 3, 'var2': 4}
+        self.assertEqual(read_obj2, expected_obj2)
+
+        read_obj3 = filemanager.read()
+        expected_obj3 = {'var1': 5, 'var2': 6}
+        self.assertEqual(read_obj3, expected_obj3)
+
+        self.assertIsNone(filemanager.read())
 
     def test_filemanager_find_in_queue(self):
         class Message():
