@@ -1,7 +1,5 @@
 import time
 import unittest
-import requests
-
 from client.client import Client
 
 LOG_FILE = 'test.log'
@@ -59,6 +57,7 @@ class TestClient(unittest.TestCase):
         with open(LOG_FILE, 'r') as file:
             line = file.readline()
         self.assertEqual(f'key: {key}, value: {value}\n', line)
+
 
 
 if __name__ == '__main__':

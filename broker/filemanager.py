@@ -5,12 +5,12 @@ import time
 
 class FileManager:
 
-    def __init__(self):
+    def __init__(self, partition, replica):
         self.pushed_objects_count = 0
         self.log_idx = 0  # index of last log file created
         self.log_dir = 'logs'
         os.makedirs(self.log_dir, exist_ok=True)
-        self.last_log = os.path.join(self.log_dir, f'{self.log_idx}.log')  # path of last log file
+        self.last_log = os.path.join(self.log_dir, f'{self.log_idx}-{partition}-{replica}.log')  # path of last log file
         # with open(self.last_log, 'w') as log_file:
         #     log_file.write('')
 
@@ -39,7 +39,9 @@ class FileManager:
                 return None
         except Exception as e:
             print(f'unable to read from file due to exception:\n{e}')
+        if len(lines) == 0:
             return None
+        return json.loads(lines[-1])
 
     def write(self, obj):
         object_json = json.dumps(obj, default=vars)
@@ -76,7 +78,6 @@ class FileManager:
 
 # todo: move this to the tests
 
-
 def filemanager_read_write_test_case():
     filemanager = FileManager()
     print(filemanager.read())
@@ -93,7 +94,7 @@ def filemanager_read_write_test_case():
     print(filemanager.read())
     print(filemanager.read())
 
-
+# todo: move this
 def filemanager_find_message_in_queue_test_case():
     class Message():
         def __init__(self, producer_id, sequence_number):
