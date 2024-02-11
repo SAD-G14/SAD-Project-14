@@ -18,7 +18,7 @@ def pull():
     message = db.read()
     if message:
         message['hidden'] = True
-        message['hidden_unitl'] = time.time() + 30000 # add 30 seconds
+        message['hidden_until'] = time.time() + 30000 # add 30 seconds
         db.write(message)
         return message
     else:

@@ -36,7 +36,6 @@ class FileManager:
         except Exception as e:
             print(f'unable to read from file due to exception:\n{e}')
             return None
-        return json.loads(oldest_message)
 
     def write(self, obj):
         object_json = json.dumps(obj, default=vars)
