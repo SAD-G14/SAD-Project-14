@@ -4,22 +4,24 @@ import requests
 
 from client.client import Client
 
+LOG_FILE = 'test.log'
+
 
 def subscribe_function(key, value) -> None:
-    with open('test_log.txt', 'a') as file:
-        file.write(f'key: {key}, value: {value}')
+    with open(LOG_FILE, 'a') as file:
+        file.write(f'key: {key}, value: {value}\n')
     return None
 
 
 class TestClient(unittest.TestCase):
     def setUp(self) -> None:
         self.client = Client('localhost', 5000)
-        with open('test_log.txt', 'w') as file:
+        with open(LOG_FILE, 'w') as file:
             file.truncate()
         return None
 
     def tearDown(self) -> None:
-        del self.client
+        self.client.deconstruct()
         return None
 
     def test_pull_empty(self):
@@ -42,12 +44,21 @@ class TestClient(unittest.TestCase):
         self.assertEqual('key_2', key)
         self.assertEqual(b'value_2', value)
 
+    def test_push_ack_pull(self):
+        self.client.push('key_1', b'value_1')
+        self.client.send_ack(self.client.producer_id, self.client.sequence_number)
+        key, value = self.client.pull()
+        self.assertEqual('exception', key)
+
     def test_subscribe_push(self):
         self.client.subscribe(subscribe_function)
         time.sleep(5)
-        self.client.push('key_1', b'value_1')
+        key, value = 'key_1', b'value_1'
+        self.client.push(key, value)
         time.sleep(5)
-        self.client.__del__()
+        with open(LOG_FILE, 'r') as file:
+            line = file.readline()
+        self.assertEqual(f'key: {key}, value: {value}\n', line)
 
 
 if __name__ == '__main__':

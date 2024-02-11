@@ -7,27 +7,30 @@ from retry import retry
 
 TIME_BETWEEN_PULLS = 1
 
+PROTOCOL = 'HTTP'
+REQUEST = {'push': 'queue/push', 'pull': 'queue/pull', 'ack': 'queue/ack', 'health': 'health'}
 
 class Client:
     def __init__(self, host: str, port: int) -> None:
-        # self.socket = socket.socket()
-        # self.socket.connect((host, port))
+        self.host = host
+        self.port = port
         self.sequence_number = 0
-        self.producer_id = int(round(time.time() * 1000))  # Todo: server should determine pID
+        # TODO: server should determine pID
+        # maybe not, because Auth is needed and this is MVP
+        self.producer_id = int(round(time.time() * 1000))
         self.threads: List[Thread] = []
         self.event: Event = Event()
         return
 
-    def __del__(self) -> None:
+    def deconstruct(self) -> None:
         self.event.set()
         for thread in self.threads:
             thread.join()
-        return
+        return None
 
     def push(self, key: str, value: bytes) -> str:
         self.sequence_number += 1
-        # url = f"http://{self.host}:{self.port}/queue/push"
-        url = "http://127.0.0.1:5000/queue/push"
+        url = f'{PROTOCOL}://{self.host}:{self.port}/' + REQUEST['push']
         data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number,
                 'producer_id': self.producer_id}
         headers = {'Content-Type': 'application/json'}
@@ -40,8 +43,7 @@ class Client:
             print(f"An error occurred: {e}")
 
     def pull(self) -> Tuple[str, bytes]:
-        # url = f"http://{self.host}:{self.port}/health"
-        url = "http://127.0.0.1:5000/queue/pull"
+        url = f'{PROTOCOL}://{self.host}:{self.port}/' + REQUEST['pull']
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -70,7 +72,7 @@ class Client:
 
     @retry(requests.exceptions.RequestException, tries=5, delay=2, backoff=2)
     def send_ack(self, producer_id: int, sequence_number: int) -> None:
-        url = "http://127.0.0.1:5000/queue/ack"
+        url = f'{PROTOCOL}://{self.host}:{self.port}/' + REQUEST['ack']
         try:
             data = {'producer_id': producer_id, 'sequence_number': sequence_number}
             headers = {'Content-Type': 'application/json'}
