@@ -43,9 +43,14 @@ def health():
     time.sleep(random.random())
     data = 'server is up and running'
     COUNTER.labels('server', 'health').inc()
-    HISTOGRAM.labels('server', 'pull').observe(time.time() - start_time)
+    HISTOGRAM.labels('server', 'health').observe(time.time() - start_time)
     return jsonify(data), 200
 
+@app.route('/alerts', methods=['POST'])
+def alerts():
+    data = request.get_json()
+    logging.fatal(data)
+    return jsonify('OK'), 200
 
 @app.route('/join', methods=['GET'])
 def join():
