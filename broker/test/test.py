@@ -328,6 +328,8 @@ class TestBroker3(unittest.TestCase):
         self.assertEqual(ack_response_second_attempt['status'], 'failure',
                          "The second ack attempt should fail, indicating idempotency.")
 
+        self.assertIsNone(pull(), "Expected no more messages to pull but got one.")
+
 
 class TestSequenceNumber(unittest.TestCase):
     def setUp(self):
