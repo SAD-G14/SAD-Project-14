@@ -58,6 +58,16 @@ class FileManager:
         logs_json = list(map(lambda x: json.loads(x), lines))
         result = list(filter(lambda x: x['producer_id'] == producer_id and x['sequence_number'] == sequence_number,
          logs_json))
+        write_back = list(filter(lambda x: x['producer_id'] != producer_id or x['sequence_number'] != sequence_number,
+         logs_json))
+        try:
+            with open(self.last_log, 'r+') as log_file:
+                log_file.seek(0)  # Go back to the start of the file
+                log_file.truncate()
+                log_file.writelines(write_back)
+        except Exception as e:
+            print(f'unable to write to file due to exception:\n{e}')
+            return None
         return result
 
 # todo: move this to the tests

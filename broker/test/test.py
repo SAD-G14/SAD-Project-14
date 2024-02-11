@@ -16,6 +16,11 @@ from broker.application.broker import push, pull, ack
 
 
 class TestClient(unittest.TestCase):
+    def setUp(self):
+        # empty database
+        while (broker.db.read() is not None):
+            continue
+
     def test_add_positive_numbers(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
                                                  producer_id=1707058229693, sequence_number=1)
@@ -69,6 +74,11 @@ class TestClient(unittest.TestCase):
 
 
 class TestFileManager(unittest.TestCase):
+    def setUp(self):
+        # empty database
+        while (broker.db.read() is not None):
+            continue
+
     def test_filemanager_read_write(self):
         filemanager = FileManager()
         self.assertEqual(filemanager.read(), None)
@@ -142,6 +152,11 @@ class TestFileManager(unittest.TestCase):
 
 # NOT WORKING
 class TestBroker(unittest.TestCase):
+    # def setUp(self):
+    #     # empty database
+    #     while (broker.db.read() is not None):
+    #         continue
+        
     def setUp(self):
         self.filemanager = FileManager()
         self.produced_messages = []
@@ -207,9 +222,13 @@ class TestBroker(unittest.TestCase):
 
 
 class TestBroker2(unittest.TestCase):
-
     def setUp(self):
-        self.file_manager = FileManager()
+        # empty database
+        while (broker.db.read() is not None):
+            continue
+
+    # def setUp(self):
+    #     self.file_manager = FileManager()
 
     # NOT WORKING
     def test_acknowledgement(self):
@@ -218,7 +237,7 @@ class TestBroker2(unittest.TestCase):
         pulled_message = pull()
 
         ack_response = ack(pulled_message['producer_id'], pulled_message['sequence_number'])
-        self.assertTrue(ack_response['status'], 'success')
+        self.assertEqual(ack_response['status'], 'success')
 
         self.assertIsNone(pull())
 
@@ -238,6 +257,11 @@ class TestMessageRequest(unittest.TestCase):
 
 
 class TestMessage(unittest.TestCase):
+    def setUp(self):
+        # empty database
+        while (broker.db.read() is not None):
+            continue
+    
     def test_message_creation_and_serialization(self):
         message = Message('key', 'value', 123456789, 1, 1)
         serialized_message = message.serialize()
@@ -256,8 +280,15 @@ class TestMessage(unittest.TestCase):
 
 class TestFlaskApp(unittest.TestCase):
     def setUp(self):
+        # empty database
+        while (broker.db.read() is not None):
+            continue
         app.testing = True
         self.client = app.test_client()
+        
+    # def setUp(self):
+    #     app.testing = True
+    #     self.client = app.test_client()
 
     def test_push(self):
         response = self.client.post('/queue/push', json={
