@@ -366,6 +366,18 @@ class TestClient2(unittest.TestCase):
         self.assertEqual(status_code, '200')
         self.assertIn('test_key', message.decode('utf-8'))
 
+    @patch('requests.post')
+    def test_client_send_ack(self, mock_post):
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {'status': 'success'}
+
+        self.client.send_ack(123, 1)
+        mock_post.assert_called_with(
+            "http://127.0.0.1:5000/queue/ack",
+            data=json.dumps({'producer_id': 123, 'sequence_number': 1}),
+            headers={'Content-Type': 'application/json'}
+        )
+
 
 
 if __name__ == '__main__':
