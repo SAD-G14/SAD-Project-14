@@ -11,6 +11,10 @@ class FileManager:
         self.log_dir = 'logs'
         os.makedirs(self.log_dir, exist_ok=True)
         self.last_log = os.path.join(self.log_dir, f'{self.log_idx}.log')  # path of last log file
+        # with open(self.last_log, 'w') as log_file:
+        #     log_file.write('')
+
+    def empty(self):
         with open(self.last_log, 'w') as log_file:
             log_file.write('')
 
