@@ -1,6 +1,6 @@
 import os
 import json
-import datetime
+import time
 
 
 class FileManager:
@@ -24,7 +24,7 @@ class FileManager:
                 index = 0
                 while (index < len(lines)):
                     data = json.loads(lines[index])
-                    if (not data['hidden']) or data['hidden_until'] < datetime.datetime.now():
+                    if (not data['hidden']) or data['hidden_until'] < time.time():
                         break
                     index += 1
                 if index < len(lines):
