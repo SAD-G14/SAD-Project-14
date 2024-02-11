@@ -313,6 +313,29 @@ class TestBroker3(unittest.TestCase):
             self.assertIsNone(broker.pull())
 
 
+class TestSequenceNumber(unittest.TestCase):
+    def setUp(self):
+        self.filemanager = FileManager()
+        self.filemanager.empty()
+
+    def test_message_sequence_order(self):
+        producer_id = 1
+        num_messages = 3
+
+        for sequence_number in range(1, num_messages + 1):
+            msg_request = MessageRequest('key', 'value', int(time.time()), producer_id, sequence_number)
+            push(msg_request)
+
+        for expected_sequence_number in range(1, num_messages + 1):
+            message = pull()
+            self.assertIsNotNone(message, "Expected a message to be pulled but got None.")
+            self.assertEqual(message['producer_id'], producer_id, "The producer_id should match the expected.")
+            self.assertEqual(message['sequence_number'], expected_sequence_number,
+                             "The sequence_number should be in order.")
+
+        self.assertIsNone(pull(), "Expected no more messages to pull but got one.")
+
+
 class TestMessageRequest(unittest.TestCase):
     def test_message_request_creation(self):
         message_request = MessageRequest('key', 'value', 123456789, 1, 1)
