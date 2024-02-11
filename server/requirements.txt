@@ -2,3 +2,4 @@ flask~=3.0.0
 requests~=2.31.0
 retry~=0.9.2
 uhashring~=2.3
+prometheus-client==0.17.1
