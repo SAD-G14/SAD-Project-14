@@ -58,8 +58,9 @@ class FileManager:
         logs_json = list(map(lambda x: json.loads(x), lines))
         result = list(filter(lambda x: x['producer_id'] == producer_id and x['sequence_number'] == sequence_number,
          logs_json))
-        write_back = list(filter(lambda x: x['producer_id'] != producer_id or x['sequence_number'] != sequence_number,
-         logs_json))
+        write_back = list(map(lambda x: json.dumps(x, default=vars),
+         list(filter(lambda x: x['producer_id'] != producer_id or x['sequence_number'] != sequence_number,
+         logs_json))))
         try:
             with open(self.last_log, 'r+') as log_file:
                 log_file.seek(0)  # Go back to the start of the file
