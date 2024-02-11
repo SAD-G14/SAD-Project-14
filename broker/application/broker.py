@@ -2,6 +2,8 @@ from broker.data import message_request as MessageData
 from broker.filemanager import FileManager
 from broker.model.message import Message as MessageModel
 
+import time
+
 db = FileManager()
 
 
@@ -14,17 +16,21 @@ def push(message_data: MessageData) -> dict:
 
 def pull():
     message = db.read()
-    message.hidden = True
-    db.write(message)
-    return message.serialize()
+    if message:
+        message['hidden'] = True
+        message['hidden_until'] = time.time() + 30000 # add 30 seconds
+        db.write(message)
+        return message
+    else:
+        return None
 
 
 def ack(producer_id: int, sequence_number: int) -> dict:
-    # Find the message in the queue and mark it as acknowledged
-    # This depends on how your messages are stored in the queue
-    message = db.find_message_in_queue(producer_id, sequence_number)  # TODO find message in queue
-    if message:
-        message.acknowledged = True
+    messages = db.find_message_in_queue(producer_id, sequence_number)
+    if messages:
+        for message in messages:
+            message['acknowledged'] = True
+            db.write(message)
         return {'status': 'success'}
     else:
         return {'status': 'failure'}

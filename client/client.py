@@ -20,7 +20,8 @@ class Client:
         self.sequence_number += 1
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
-        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number, 'producer_id': self.producer_id}
+        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number,
+                'producer_id': self.producer_id}
         headers = {'Content-Type': 'application/json'}
         json_data = json.dumps(data)
         try:
