@@ -312,6 +312,22 @@ class TestBroker3(unittest.TestCase):
         for _ in messages_to_push:
             self.assertIsNone(broker.pull())
 
+    def test_more_than_one_ack(self):
+        producer_id = 100
+        sequence_number = 1
+        msg_request = MessageRequest('key', 'value', int(time.time()), producer_id, sequence_number)
+        push(msg_request)
+
+        message = pull()
+        self.assertIsNotNone(message, "Expected a message to be pulled but got None.")
+
+        ack_response = ack(producer_id, sequence_number)
+        self.assertEqual(ack_response['status'], 'success', "The message should be acknowledged successfully.")
+
+        ack_response_second_attempt = ack(producer_id, sequence_number)
+        self.assertEqual(ack_response_second_attempt['status'], 'failure',
+                         "The second ack attempt should fail, indicating idempotency.")
+
 
 class TestSequenceNumber(unittest.TestCase):
     def setUp(self):
