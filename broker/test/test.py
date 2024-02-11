@@ -173,6 +173,12 @@ class TestFileManager(unittest.TestCase):
         found_messages = filemanager.find_message_in_queue(2, 1)
         self.assertEqual(len(found_messages), 0)
 
+    def test_filemanager_empty(self):
+        filemanager = FileManager()
+        filemanager.write({'data': 'test'})
+        filemanager.empty()
+        self.assertIsNone(filemanager.read())
+
 
 # NOT WORKING
 class TestBroker(unittest.TestCase):
