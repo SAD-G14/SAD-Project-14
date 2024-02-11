@@ -275,6 +275,40 @@ class TestBroker2(unittest.TestCase):
         self.assertEqual(ack_response['status'], 'failure')
 
 
+class TestBroker3(unittest.TestCase):
+    def setUp(self):
+        self.filemanager = FileManager()
+        self.filemanager.empty()
+
+    def test_multiple_push_and_pull(self):
+        messages_to_push = [
+            MessageRequest('key1', 'value1', 1707058229, 1, 1),
+            MessageRequest('key2', 'value2', 1707058230, 2, 1),
+            MessageRequest('key3', 'value3', 1707058231, 3, 1)
+        ]
+
+        for msg_request in messages_to_push:
+            broker.push(msg_request)
+
+        pulled_messages = []
+        for _ in messages_to_push:
+            pulled_message = broker.pull()
+            if pulled_message is not None:
+                pulled_message['hidden'] = True
+                pulled_message['hidden_until'] = time.time() + 30
+                self.filemanager.write(pulled_message)
+                pulled_messages.append(pulled_message)
+
+        for original_msg, pulled_msg in zip(messages_to_push, pulled_messages):
+            self.assertEqual(original_msg.key, pulled_msg['key'])
+            self.assertEqual(original_msg.value, pulled_msg['value'])
+            self.assertEqual(original_msg.producer_id, pulled_msg['producer_id'])
+            self.assertEqual(original_msg.sequence_number, pulled_msg['sequence_number'])
+
+
+
+
+
 class TestMessageRequest(unittest.TestCase):
     def test_message_request_creation(self):
         message_request = MessageRequest('key', 'value', 123456789, 1, 1)
@@ -354,6 +388,7 @@ class TestFlaskApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['status'], 'success')
 
+
 class TestClient2(unittest.TestCase):
     def setUp(self):
         self.client = Client('localhost', 5000)
@@ -383,7 +418,6 @@ class TestClient2(unittest.TestCase):
             data=json.dumps({'producer_id': 123, 'sequence_number': 1}),
             headers={'Content-Type': 'application/json'}
         )
-
 
 
 if __name__ == '__main__':
