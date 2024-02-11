@@ -23,12 +23,13 @@ def push():
     return jsonify(response), 200
 
 
-@app.route('/queue/pull', methods=['GET'])
+@app.route('/queue/pull', methods=['POST'])
 def pull():
-    logging.info("GET /queue/pull")
+    logging.info("POST /queue/pull with data: {}".format(request.get_json()))
     if broker.REPLICA:
-        requests.get('http://{}:5000/queue/pull'.format(broker.REPLICA['ip']), json=request.get_json())
-    response = broker.pull()
+        res = requests.post('http://{}:5000/queue/pull'.format(broker.REPLICA['ip']), json=request.get_json())
+        logging.info("POST /queue/pull with response: {}".format(res))
+    response = broker.pull(request.get_json())
     return jsonify(response), 200
 
 
@@ -40,6 +41,9 @@ def health():
 
 @app.route('/queue/ack', methods=['POST'])
 def ack():
+    logging.info("POST /queue/ack with data: {}".format(request.get_json()))
+    if broker.REPLICA:
+        requests.post('http://{}:5000/queue/ack'.format(broker.REPLICA['ip']), json=request.get_json())
     data = request.get_json()
     producer_id = data['producer_id']
     sequence_number = data['sequence_number']

@@ -1,3 +1,4 @@
+import logging
 import time
 import requests
 import json
@@ -46,14 +47,15 @@ class Client:
     def pull(self) -> Tuple[str, bytes]:
         url = f'{PROTOCOL}://{self.host}:{self.port}/' + REQUEST['pull']
         try:
-            response = requests.get(url)
+            response = requests.post(url, data=json.dumps({'producer_id': self.producer_id}), headers={'Content-Type': 'application/json'})
             response.raise_for_status()
             response_json = json.loads(response.content)
             if response_json is None:
-                raise Exception
+                raise Exception("response is empty")
             self.send_ack(int(response_json['producer_id']), int(response_json['sequence_number']))
             return str(response_json['key']), str(response_json['value']).encode()
         except Exception as e:
+            logging.error(e)
             return 'exception', str(e).encode()
 
     def subscribe(self, f: Callable[[str, bytes], None]) -> None:

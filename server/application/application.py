@@ -11,18 +11,19 @@ class Application:
         self.number_of_brokers = 0
         pass
 
-    def pull(self):
-        for i in range(len(self.nodes)):
-            # we need the loop for the case that some brokers are empty
-            node = self.nodes[lb.get_rr_node()]
-            data = node.pull()
-            if data:
-                return data
-        return None
+    def pull(self, data):
+        node = self.nodes[lb.get_node_from_key(data['producer_id'])*2]
+        res = requests.post('http://{}:5000/queue/pull'.format(node['ip']), json=data)
+        return res.json()
 
     def push(self, data):
         node = self.nodes[lb.get_rr_node()*2]
         res = requests.post('http://{}:5000/queue/push'.format(node['ip']), json=data)
+        return res.json()
+
+    def ack(self, data):
+        node = self.nodes[lb.get_node_from_key(data['producer_id'])*2]
+        res = requests.post('http://{}:5000/queue/ack'.format(node['ip']), json=data)
         return res.json()
 
     def join(self, address):

@@ -20,8 +20,9 @@ def push(message_data: MessageData) -> dict:
     return {'producer_id': written_message.producer_id, 'sequence_number': written_message.sequence_number}
 
 
-def pull():
+def pull(data):
     message = db.read()
+    logging.info("pull message by {} - message found : {}".format(data, message))
     if message:
         message['hidden'] = True
         message['hidden_until'] = time.time() + 30000 # add 30 seconds
@@ -32,6 +33,7 @@ def pull():
 
 
 def ack(producer_id: int, sequence_number: int) -> dict:
+    logging.info("ack message by {} - {}".format(producer_id, sequence_number))
     messages = db.find_message_in_queue(producer_id, sequence_number)
     if messages:
         for message in messages:
