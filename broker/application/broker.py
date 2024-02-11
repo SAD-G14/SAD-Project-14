@@ -30,6 +30,7 @@ def ack(producer_id: int, sequence_number: int) -> dict:
     if messages:
         for message in messages:
             message['acknowledged'] = True
+            db.write(message)
         return {'status': 'success'}
     else:
         return {'status': 'failure'}

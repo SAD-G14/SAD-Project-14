@@ -25,8 +25,9 @@ class TestClient(unittest.TestCase):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
                                                  producer_id=1707058229693, sequence_number=1)
         written_message = broker.push(message_request)
-        print(written_message)
-        self.assertTrue(True)
+        # print(written_message)
+        # self.assertTrue(True)
+        self.assertEqual(written_message, {'producer_id': 1707058229693, 'sequence_number': 1})
 
     def test_push_and_pull(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
@@ -38,6 +39,7 @@ class TestClient(unittest.TestCase):
         broker.push(message_request)
         pulled_message = broker.pull()
 
+        pulled_message['hidden_until'] = 0
         self.assertEqual(expected_message, pulled_message)
 
     def test_ack_successful(self):
@@ -87,6 +89,18 @@ class TestFileManager(unittest.TestCase):
             def __init__(self, var1, var2):
                 self.var1 = var1
                 self.var2 = var2
+                self.hidden = False
+                self.hidden_until = 0
+                self.acknowledged = False
+
+            def serialize(self):
+                return {
+                    'var1': self.var1,
+                    'var2': self.var2,
+                    'hidden': self.hidden,
+                    'hidden_until': self.hidden_until,
+                    'acknowledged': self.acknowledged
+                }
 
         obj1 = DummyClass(1, 2)
         obj2 = DummyClass(3, 4)
@@ -94,19 +108,15 @@ class TestFileManager(unittest.TestCase):
 
         filemanager.write(obj1)
         read_obj1 = filemanager.read()
-        expected_obj1 = {'var1': 1,
-                         'var2': 2}
-        self.assertEqual(read_obj1, expected_obj1)
+        self.assertEqual(obj1.serialize(), read_obj1)
 
         filemanager.write(obj2)
         filemanager.write(obj3)
         read_obj2 = filemanager.read()
-        expected_obj2 = {'var1': 3, 'var2': 4}
-        self.assertEqual(read_obj2, expected_obj2)
+        self.assertEqual(obj2.serialize(), read_obj2)
 
         read_obj3 = filemanager.read()
-        expected_obj3 = {'var1': 5, 'var2': 6}
-        self.assertEqual(read_obj3, expected_obj3)
+        self.assertEqual(obj3.serialize(), read_obj3)
 
         self.assertIsNone(filemanager.read())
 
@@ -115,11 +125,17 @@ class TestFileManager(unittest.TestCase):
             def __init__(self, producer_id, sequence_number):
                 self.producer_id = producer_id
                 self.sequence_number = sequence_number
+                self.hidden = False
+                self.hidden_until = 0
+                self.acknowledged = False
 
             def serialize(self):
                 return {
                     'producer_id': self.producer_id,
-                    'sequence_number': self.sequence_number
+                    'sequence_number': self.sequence_number,
+                    'hidden': self.hidden,
+                    'hidden_until': self.hidden_until,
+                    'acknowledged': self.acknowledged
                 }
 
         filemanager = FileManager()
@@ -143,7 +159,9 @@ class TestFileManager(unittest.TestCase):
             'key': 'Ali',
             'value': 'New message',
             'date': 2024,
-            'hidden': False
+            'hidden': False,
+            'hidden_until': 0,
+            'acknowledged': False
         }
         filemanager.write(message)
         found_messages = filemanager.find_message_in_queue(2, 1)

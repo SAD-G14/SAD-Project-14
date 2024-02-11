@@ -24,7 +24,7 @@ class FileManager:
                 index = 0
                 while (index < len(lines)):
                     data = json.loads(lines[index])
-                    if (not data['hidden']) or data['hidden_until'] < time.time():
+                    if ((not data['hidden']) or data['hidden_until'] < time.time()) and (not data['acknowledged']):
                         break
                     index += 1
                 if index < len(lines):
@@ -55,7 +55,7 @@ class FileManager:
             print(f'unable to read from file due to exception:\n{e}')
             return None
         logs_json = list(map(lambda x: json.loads(x), lines))
-        result = list(filter(lambda x: x['producer_id'] == producer_id and x['sequence_number'] == sequence_number,
+        result = list(filter(lambda x: x['producer_id'] == producer_id and x['sequence_number'] == sequence_number and (not x['acknowledged']),
          logs_json))
         write_back = list(map(lambda x: f'{json.dumps(x, default=vars)}\n',
          list(filter(lambda x: x['producer_id'] != producer_id or x['sequence_number'] != sequence_number,
