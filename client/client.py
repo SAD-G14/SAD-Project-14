@@ -1,8 +1,8 @@
-import threading
 import time
 import requests
 import json
-from typing import Tuple, Callable
+from threading import Thread, Event
+from typing import Tuple, List, Callable
 from retry import retry
 
 TIME_BETWEEN_PULLS = 1
@@ -14,13 +14,22 @@ class Client:
         # self.socket.connect((host, port))
         self.sequence_number = 0
         self.producer_id = int(round(time.time() * 1000))  # Todo: server should determine pID
+        self.threads: List[Thread] = []
+        self.event: Event = Event()
+        return
+
+    def __del__(self) -> None:
+        self.event.set()
+        for thread in self.threads:
+            thread.join()
         return
 
     def push(self, key: str, value: bytes) -> str:
         self.sequence_number += 1
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
-        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number, 'producer_id': self.producer_id}
+        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number,
+                'producer_id': self.producer_id}
         headers = {'Content-Type': 'application/json'}
         json_data = json.dumps(data)
         try:
@@ -36,19 +45,27 @@ class Client:
         try:
             response = requests.get(url)
             response.raise_for_status()
-            return str(response.status_code), response.content
-        except requests.exceptions.RequestException as e:
-            return str(e), b''
+            response_json = json.loads(response.content)
+            if response_json is None:
+                raise Exception
+            self.send_ack(int(response_json['producer_id']), int(response_json['sequence_number']))
+            return str(response_json['key']), str(response_json['value']).encode()
+        except Exception as e:
+            return 'exception', str(e).encode()
 
     def subscribe(self, f: Callable[[str, bytes], None]) -> None:
-        threading.Thread(target=self.consumer_function, args=(f,)).start()
+        self.threads.append(Thread(target=self.consumer_function, args=(f,)))
+        self.threads[-1].start()
         return
 
     def consumer_function(self, f: Callable[[str, bytes], None]) -> None:
         while True:
             time.sleep(TIME_BETWEEN_PULLS)
             key, value = self.pull()
-            f(key, value)
+            if key != 'exception':
+                f(key, value)
+            if self.event.is_set():
+                break
         return
 
     @retry(requests.exceptions.RequestException, tries=5, delay=2, backoff=2)
@@ -62,5 +79,3 @@ class Client:
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return str(e), b''
-
-
