@@ -1,7 +1,7 @@
 import os
 import unittest
+from unittest.mock import patch, MagicMock
 
-# from flask import json
 import json
 import threading
 import time
@@ -13,6 +13,8 @@ from broker.filemanager import FileManager
 from broker.model.message import Message
 from broker.data.message_request import MessageRequest
 from broker.application.broker import push, pull, ack
+from client.Client import Client
+from client.Client import TIME_BETWEEN_PULLS
 
 
 def setUp():
@@ -178,7 +180,7 @@ class TestBroker(unittest.TestCase):
     #     # empty database
     #     while (broker.db.read() is not None):
     #         continue
-        
+
     def setUp(self):
         self.filemanager = FileManager()
         self.produced_messages = []
@@ -281,7 +283,7 @@ class TestMessage(unittest.TestCase):
     def setUp(self):
         # empty database
         setUp()
-    
+
     def test_message_creation_and_serialization(self):
         message = Message('key', 'value', 123456789, 1, 1)
         serialized_message = message.serialize()
@@ -304,7 +306,7 @@ class TestFlaskApp(unittest.TestCase):
         setUp()
         app.testing = True
         self.client = app.test_client()
-        
+
     # def setUp(self):
     #     app.testing = True
     #     self.client = app.test_client()
@@ -333,20 +335,37 @@ class TestFlaskApp(unittest.TestCase):
         self.assertEqual(response.json['key'], 'key')
 
     def test_ack(self):
-        # Push a message first
         self.client.post('/queue/push', json={
             'key': 'key',
             'value': 'value',
             'producer_id': 1,
             'sequence_number': 1
         })
-        # Acknowledge the message
         response = self.client.post('/queue/ack', json={
             'producer_id': 1,
             'sequence_number': 1
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['status'], 'success')
+
+class TestClient2(unittest.TestCase):
+    def setUp(self):
+        self.client = Client('localhost', 5000)
+
+    @patch('requests.get')
+    def test_client_pull(self, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.content = json.dumps({
+            'key': 'test_key',
+            'value': 'test_value',
+            'producer_id': 123,
+            'sequence_number': 1
+        }).encode('utf-8')
+
+        status_code, message = self.client.pull()
+        self.assertEqual(status_code, '200')
+        self.assertIn('test_key', message.decode('utf-8'))
+
 
 
 if __name__ == '__main__':

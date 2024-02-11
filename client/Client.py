@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 TIME_BETWEEN_PULLS = 1
 
+
 class Client:
     def __init__(self, host: str, port: int, max_worker_threads: int = 1) -> None:
         self.socket = socket.socket()
@@ -22,7 +23,8 @@ class Client:
         self.sequence_number += 1
         # url = f"http://{self.host}:{self.port}/queue/push"
         url = "http://127.0.0.1:5000/queue/push"
-        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number, 'producer_id': self.producer_id}
+        data = {'key': key, 'value': value.decode(), 'sequence_number': self.sequence_number,
+                'producer_id': self.producer_id}
         headers = {'Content-Type': 'application/json'}
         json_data = json.dumps(data)
         try:
@@ -47,7 +49,7 @@ class Client:
         return
 
     def consumer_function(self, f: Callable[[str, bytes], None]) -> None:
-        while(True):
+        while (True):
             time.sleep(TIME_BETWEEN_PULLS)
             key, value = self.pull()
             f(key, value)
@@ -64,5 +66,3 @@ class Client:
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return str(e), b''
-
-
