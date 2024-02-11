@@ -15,7 +15,7 @@ class Application:
             data = node.pull()
             if data:
                 return data
-        return data
+        return None
 
     def push(self, data):
         key = data.key
