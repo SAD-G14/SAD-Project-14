@@ -10,6 +10,7 @@ TIME_BETWEEN_PULLS = 1
 PROTOCOL = 'HTTP'
 REQUEST = {'push': 'queue/push', 'pull': 'queue/pull', 'ack': 'queue/ack', 'health': 'health'}
 
+
 class Client:
     def __init__(self, host: str, port: int) -> None:
         self.host = host

@@ -13,8 +13,8 @@ from broker.filemanager import FileManager
 from broker.model.message import Message
 from broker.data.message_request import MessageRequest
 from broker.application.broker import push, pull, ack
-from client.Client import Client
-from client.Client import TIME_BETWEEN_PULLS
+from client.client import Client
+from client.client import TIME_BETWEEN_PULLS
 
 
 def setUp():
@@ -354,6 +354,7 @@ class TestFlaskApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['status'], 'success')
 
+
 class TestClient2(unittest.TestCase):
     def setUp(self):
         self.client = Client('localhost', 5000)
@@ -383,7 +384,6 @@ class TestClient2(unittest.TestCase):
             data=json.dumps({'producer_id': 123, 'sequence_number': 1}),
             headers={'Content-Type': 'application/json'}
         )
-
 
 
 if __name__ == '__main__':
