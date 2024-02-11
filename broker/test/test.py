@@ -305,8 +305,12 @@ class TestBroker3(unittest.TestCase):
             self.assertEqual(original_msg.producer_id, pulled_msg['producer_id'])
             self.assertEqual(original_msg.sequence_number, pulled_msg['sequence_number'])
 
+        for pulled_msg in pulled_messages:
+            ack_result = broker.ack(pulled_msg['producer_id'], pulled_msg['sequence_number'])
+            self.assertEqual(ack_result['status'], 'success')
 
-
+        for _ in messages_to_push:
+            self.assertIsNone(broker.pull())
 
 
 class TestMessageRequest(unittest.TestCase):
