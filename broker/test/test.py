@@ -28,7 +28,7 @@ class TestClient(unittest.TestCase):
         # empty database
         setUp()
 
-    def test_add_positive_numbers(self):
+    def test_sample(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
                                                  producer_id=1707058229693, sequence_number=1)
         written_message = broker.push(message_request)

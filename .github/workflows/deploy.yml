@@ -2,9 +2,9 @@ name: Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
   pull_request:
-      branches: [ main ]
+      branches: [ dev ]
 
 
 
@@ -23,7 +23,6 @@ jobs:
         script: |
           ls
           cd /home/sad/SAD-Project-14/
-          git pull origin main
+          git pull origin dev
           git status
-          docker build . --file ./broker/Dockerfile --tag my-image-name:$(date +%s) 
-          docker compose up -d
+          docker compose up -d --build
