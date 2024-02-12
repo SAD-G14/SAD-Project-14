@@ -57,6 +57,14 @@ def join_server():
             logging.warn("could not join server: {}".format(e))
             time.sleep(1)
 
+def send_request_to_replica(endpoint, request):
+    global REPLICA
+    if REPLICA:
+        try:
+            requests.post('http://{}:5000/queue/{}'.format(REPLICA['ip'], endpoint), json=request.get_json())
+        except requests.exceptions.RequestException:
+            logging.warning("replica {} is down, will not send requests to it anymore".format(REPLICA))
+            REPLICA = None
 
 def accept_replica(replica):
     global REPLICA

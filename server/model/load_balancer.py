@@ -10,11 +10,11 @@ class LoadBalancer:
     def add_node(self, node):
         print("nodes added")
         self.nodes.append(node)
-        self.hr.add_node(node)
+        self.hr = HashRing(nodes=self.nodes)
 
     def remove_node(self, node):
-        self.hr.remove_node(node)
         self.nodes.remove(node)
+        self.hr = HashRing(nodes=self.nodes)
 
     def get_node_from_key(self, key):
         return self.hr.get(key)['hostname']

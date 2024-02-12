@@ -2,10 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ dev ]
-  pull_request:
-      branches: [ dev ]
-
+    branches: [ production ]
 
 
 jobs:
@@ -23,6 +20,6 @@ jobs:
         script: |
           ls
           cd /home/sad/SAD-Project-14/
-          git pull origin dev
+          git pull origin production
           git status
           docker compose up -d --build

@@ -3,7 +3,7 @@ import time
 
 from flask import Flask, request, jsonify
 
-from application.application import Application
+from application.application import Application, COUNTER, HISTOGRAM
 import logging
 from prometheus_client import Counter, Histogram
 from prometheus_client import start_http_server
@@ -13,9 +13,6 @@ logging.basicConfig(level=logging.DEBUG)
 application = Application()
 
 app = Flask(__name__)
-
-COUNTER = Counter(name='method_calls', documentation='Number of method calls', labelnames=['node', 'method'])
-HISTOGRAM = Histogram(name='method_latency', documentation='latency of methods', labelnames=['node', 'method'])
 
 @app.route('/queue/push', methods=['POST'])
 def push():
