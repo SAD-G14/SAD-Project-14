@@ -13,7 +13,7 @@ REQUEST = {'push': 'queue/push', 'pull': 'queue/pull', 'ack': 'queue/ack', 'heal
 
 
 class Client:
-    def __init__(self, host: str, port: int) -> None:
+    def __init__(self, host:str='195.177.255.132', port: int = 4000) -> None:
         self.host = host
         self.port = port
         self.sequence_number = 0
