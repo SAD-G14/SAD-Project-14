@@ -8,6 +8,8 @@ services:
     ports:
       - "4000:4000"
       - "4005:4005"
+    volumes:
+      - ./server:/server
   broker:
     deploy:
       mode: replicated

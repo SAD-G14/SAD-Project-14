@@ -71,5 +71,5 @@ def join():
 
 if __name__ == '__main__':
     logging.info("server is up")
-    start_http_server(4005)
-    app.run(host='0.0.0.0', port=4000)
+    start_http_server(4005) # prometheus port
+    app.run(host='0.0.0.0', port=4000, threaded=True)
