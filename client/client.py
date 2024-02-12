@@ -74,10 +74,10 @@ class Client:
         return
 
     @retry(requests.exceptions.RequestException, tries=5, delay=2, backoff=2)
-    def send_ack(self, producer_id: int, sequence_number: int) -> None:
+    def send_ack(self, producer_id: int, sequence_number: int, key:str='key') -> None:
         url = f'{PROTOCOL}://{self.host}:{self.port}/' + REQUEST['ack']
         try:
-            data = {'producer_id': producer_id, 'sequence_number': sequence_number}
+            data = {'producer_id': producer_id, 'sequence_number': sequence_number, 'key': key}
             headers = {'Content-Type': 'application/json'}
             json_data = json.dumps(data)
             response = requests.post(url, data=json_data, headers=headers)
