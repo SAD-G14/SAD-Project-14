@@ -2,9 +2,9 @@ from uhashring import HashRing
 
 
 class LoadBalancer:
-    def __init__(self):
+    def __init__(self, nodes):
         self.node_index = 0
-        self.nodes = []
+        self.nodes = [i for i in range(int(len(nodes)/2))]
         self.hr = HashRing(nodes=self.nodes)
 
     def add_node(self, node):
