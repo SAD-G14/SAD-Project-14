@@ -1,11 +1,14 @@
 import logging
-
+from time import time
+from prometheus_client import Counter, Histogram
 import requests
 
 from server.model.load_balancer import LoadBalancer
 
 lb = LoadBalancer()
 
+COUNTER = Counter(name='method_calls', documentation='Number of method calls', labelnames=['node', 'method'])
+HISTOGRAM = Histogram(name='method_latency', documentation='latency of methods', labelnames=['node', 'method'])
 
 class Application:
     def __init__(self):
@@ -39,9 +42,12 @@ class Application:
         return broker
 
     def send_request_to_broker(self, node_index: int, method: str, data):
+        COUNTER.labels('{}'.format(int(node_index/2)), method).inc()
+        start_time = time()
         node = self.nodes[node_index]
         try:
             response = requests.post('http://{}:5000/queue/{}'.format(node['ip'], method), json=data).json()
+            HISTOGRAM.labels('{}'.format(int(node_index/2)), method).observe(time() - start_time)
             return response
         except requests.exceptions.RequestException as e:
             # pass
