@@ -18,14 +18,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
+        "uid": "eed3afcd-0406-4a65-a4d0-4acaa1dc0798"
       },
       "fieldConfig": {
         "defaults": {
@@ -78,7 +77,6 @@
               }
             ]
           },
-          "unit": "bytes",
           "unitScale": true
         },
         "overrides": []
@@ -89,7 +87,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 3,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": [],
@@ -106,36 +104,27 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
+            "uid": "eed3afcd-0406-4a65-a4d0-4acaa1dc0798"
           },
-          "editorMode": "code",
-          "expr": "sum(node_filesystem_size_bytes) - sum(node_filesystem_avail_bytes)",
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "method_latency_count",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "used",
+          "legendFormat": "{{node}} {{method}}",
           "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
-          },
-          "editorMode": "code",
-          "expr": "sum(node_filesystem_size_bytes)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "available",
-          "range": true,
-          "refId": "B"
+          "refId": "A",
+          "useBackend": false
         }
       ],
-      "title": "Disk space",
+      "title": "Panel Title",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
+        "uid": "eed3afcd-0406-4a65-a4d0-4acaa1dc0798"
       },
       "fieldConfig": {
         "defaults": {
@@ -239,8 +228,8 @@
             "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "rate(method_latency_sum{node=\"server\"}[$__rate_interval])",
+          "editorMode": "code",
+          "expr": "rate(method_latency_sum{node=\"server\"}[$__rate_interval]) ",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -256,7 +245,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
+        "uid": "eed3afcd-0406-4a65-a4d0-4acaa1dc0798"
       },
       "fieldConfig": {
         "defaults": {
@@ -292,7 +281,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "line"
+              "mode": "off"
             }
           },
           "mappings": [],
@@ -302,37 +291,17 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
+          "unit": "bytes",
           "unitScale": true
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "push_server"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -340,7 +309,7 @@
         "x": 0,
         "y": 8
       },
-      "id": 1,
+      "id": 3,
       "options": {
         "legend": {
           "calcs": [],
@@ -359,20 +328,100 @@
             "type": "prometheus",
             "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "rate(method_latency_sum{node!=\"server\"}[$__rate_interval])",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
+          "editorMode": "code",
+          "expr": "sum(node_filesystem_size_bytes) - sum(node_filesystem_avail_bytes)",
           "instant": false,
-          "legendFormat": "{{method}}_{{node}}",
+          "legendFormat": "used",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
+          },
+          "editorMode": "code",
+          "expr": "sum(node_filesystem_size_bytes) ",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "available",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Disk space",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "eed3afcd-0406-4a65-a4d0-4acaa1dc0798"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unitScale": true
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 1,
+      "options": {
+        "bucketOffset": 0,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "f2c3ca7d-0e01-40f1-9bdd-91205a6f000d"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "rate(method_latency_sum[$__rate_interval])",
+          "fullMetaSearch": false,
+          "includeNullMetadata": false,
+          "instant": false,
+          "legendFormat": "{{method}}{{node}}",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
       "title": "Brokers response time",
-      "type": "timeseries"
+      "type": "histogram"
     }
   ],
   "refresh": "",
@@ -382,13 +431,13 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "New dashboard",
   "uid": "ccdf8f43-1a6d-46e0-b15d-43ed17b720c1",
-  "version": 7,
+  "version": 2,
   "weekStart": ""
 }
