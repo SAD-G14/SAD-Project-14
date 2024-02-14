@@ -13,8 +13,8 @@ from broker.filemanager import FileManager
 from broker.model.message import Message
 from broker.data.message_request import MessageRequest
 from broker.application.broker import push, pull, ack
-from client.Client import Client
-from client.Client import TIME_BETWEEN_PULLS
+from client.client import Client
+from client.client import TIME_BETWEEN_PULLS
 
 
 def setUp():
@@ -28,7 +28,7 @@ class TestClient(unittest.TestCase):
         # empty database
         setUp()
 
-    def test_add_positive_numbers(self):
+    def test_sample(self):
         message_request = message.MessageRequest(key='test1', value='test2', date=1707058229,
                                                  producer_id=1707058229693, sequence_number=1)
         written_message = broker.push(message_request)
