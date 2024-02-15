@@ -44,7 +44,7 @@ class TestClient(unittest.TestCase):
             {'acknowledged': False, 'hidden': True, 'hidden_until': 0})  # Add expected default values
 
         broker.push(message_request)
-        pulled_message = broker.pull()
+        pulled_message = broker.pull('data')
 
         pulled_message['hidden_until'] = 0
         self.assertEqual(expected_message, pulled_message)
@@ -75,11 +75,11 @@ class TestClient(unittest.TestCase):
             broker.push(msg)
 
         for expected_msg in messages:
-            pulled_msg = broker.pull()
+            pulled_msg = broker.pull('data')
             relevant_pulled_msg = {k: pulled_msg[k] for k in expected_msg.serialize()}
             self.assertEqual(expected_msg.serialize(), relevant_pulled_msg)
 
-        self.assertIsNone(broker.pull())
+        self.assertIsNone(broker.pull('data'))
 
 
 class TestFileManager(unittest.TestCase):
@@ -88,7 +88,7 @@ class TestFileManager(unittest.TestCase):
         setUp()
 
     def test_filemanager_read_write(self):
-        filemanager = FileManager()
+        filemanager = FileManager(0,0)
         self.assertEqual(filemanager.read(), None)
 
         class DummyClass:
@@ -144,7 +144,7 @@ class TestFileManager(unittest.TestCase):
                     'acknowledged': self.acknowledged
                 }
 
-        filemanager = FileManager()
+        filemanager = FileManager(0,0)
         message = Message(1, 1)
         filemanager.write(message)
         filemanager.write(message)
@@ -158,7 +158,7 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(filemanager.find_message_in_queue(1, 1), [message.serialize() for _ in range(2)])
 
     def test_find_message_not_in_queue(self):
-        filemanager = FileManager()
+        filemanager = FileManager(0,0)
         message = {
             'producer_id': 1,
             'sequence_number': 1,
@@ -174,7 +174,7 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(len(found_messages), 0)
 
     def test_filemanager_empty(self):
-        filemanager = FileManager()
+        filemanager = FileManager(0,0)
         filemanager.write({'data': 'test'})
         filemanager.empty()
         self.assertIsNone(filemanager.read())
@@ -188,7 +188,7 @@ class TestBroker(unittest.TestCase):
     #         continue
 
     def setUp(self):
-        self.filemanager = FileManager()
+        self.filemanager = FileManager(0,0)
         self.produced_messages = []
         self.consumed_messages = []
         self.lock = threading.Lock()
@@ -263,12 +263,12 @@ class TestBroker2(unittest.TestCase):
     def test_acknowledgement(self):
         message_request = MessageRequest('testKey', 'testValue', 123456789, 1, 1)
         push(message_request)
-        pulled_message = pull()
+        pulled_message = pull('dummy_data')
 
         ack_response = ack(pulled_message['producer_id'], pulled_message['sequence_number'])
         self.assertEqual(ack_response['status'], 'success')
 
-        self.assertIsNone(pull())
+        self.assertIsNone(pull('dummy_data'))
 
     def test_acknowledge_nonexistent_message(self):
         ack_response = ack(999, 999)
@@ -277,7 +277,7 @@ class TestBroker2(unittest.TestCase):
 
 class TestBroker3(unittest.TestCase):
     def setUp(self):
-        self.filemanager = FileManager()
+        self.filemanager = FileManager(0,0)
         self.filemanager.empty()
 
     def test_multiple_push_and_pull(self):
@@ -292,7 +292,7 @@ class TestBroker3(unittest.TestCase):
 
         pulled_messages = []
         for _ in messages_to_push:
-            pulled_message = broker.pull()
+            pulled_message = broker.pull('dummy_data')
             if pulled_message is not None:
                 pulled_message['hidden'] = True
                 pulled_message['hidden_until'] = time.time() + 30
@@ -310,7 +310,7 @@ class TestBroker3(unittest.TestCase):
             self.assertEqual(ack_result['status'], 'success')
 
         for _ in messages_to_push:
-            self.assertIsNone(broker.pull())
+            self.assertIsNone(broker.pull('dummy_data'))
 
     def test_more_than_one_ack(self):
         producer_id = 100
@@ -318,7 +318,7 @@ class TestBroker3(unittest.TestCase):
         msg_request = MessageRequest('key', 'value', int(time.time()), producer_id, sequence_number)
         push(msg_request)
 
-        message = pull()
+        message = pull('dummy_data')
         self.assertIsNotNone(message, "Expected a message to be pulled but got None.")
 
         ack_response = ack(producer_id, sequence_number)
@@ -328,12 +328,12 @@ class TestBroker3(unittest.TestCase):
         self.assertEqual(ack_response_second_attempt['status'], 'failure',
                          "The second ack attempt should fail, indicating idempotency.")
 
-        self.assertIsNone(pull(), "Expected no more messages to pull but got one.")
+        self.assertIsNone(pull('dummy_data'), "Expected no more messages to pull but got one.")
 
 
 class TestSequenceNumber(unittest.TestCase):
     def setUp(self):
-        self.filemanager = FileManager()
+        self.filemanager = FileManager(0,0)
         self.filemanager.empty()
 
     def test_message_sequence_order(self):
@@ -345,13 +345,13 @@ class TestSequenceNumber(unittest.TestCase):
             push(msg_request)
 
         for expected_sequence_number in range(1, num_messages + 1):
-            message = pull()
+            message = pull('data')
             self.assertIsNotNone(message, "Expected a message to be pulled but got None.")
             self.assertEqual(message['producer_id'], producer_id, "The producer_id should match the expected.")
             self.assertEqual(message['sequence_number'], expected_sequence_number,
                              "The sequence_number should be in order.")
 
-        self.assertIsNone(pull(), "Expected no more messages to pull but got one.")
+        self.assertIsNone(pull('data'), "Expected no more messages to pull but got one.")
 
 
 class TestMessageRequest(unittest.TestCase):
