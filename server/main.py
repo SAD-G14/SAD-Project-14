@@ -1,5 +1,6 @@
 import random
 import time
+import sys
 
 from flask import Flask, request, jsonify
 
@@ -8,9 +9,9 @@ import logging
 from prometheus_client import Counter, Histogram
 from prometheus_client import start_http_server
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARN)
 
-application = Application()
+application = None
 
 app = Flask(__name__)
 
@@ -70,6 +71,8 @@ def join():
 
 
 if __name__ == '__main__':
+    # global application
+    application = Application(sys.argv[1] == 'leader')
     logging.info("server is up")
-    start_http_server(4005) # prometheus port
-    app.run(host='0.0.0.0', port=4000, threaded=True)
+    start_http_server(int(sys.argv[3])) # prometheus port
+    app.run(host='0.0.0.0', port=int(sys.argv[2]), threaded=True)

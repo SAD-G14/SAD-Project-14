@@ -1,6 +1,7 @@
 import json
 import logging
 from time import time
+from time import sleep
 from prometheus_client import Counter, Histogram
 import requests
 import threading
@@ -11,22 +12,17 @@ COUNTER = Counter(name='method_calls', documentation='Number of method calls', l
 HISTOGRAM = Histogram(name='method_latency', documentation='latency of methods', labelnames=['node', 'method'])
 
 
-def load_file():
-    try:
-        with open('ip_table', 'r') as file:
-            return json.load(file)
-    except FileNotFoundError as e:
-        logging.error("ip_table file not found: {}".format(e))
-        return []
 
 class Application:
-    def __init__(self):
-        self.nodes = load_file()
+    def __init__(self, is_leader: bool):
+        self.nodes = self.load_file()
+        self.lb = LoadBalancer(self.nodes.copy())
         logging.info("nodes: {}".format(self.nodes))
         self.number_of_brokers = len(self.nodes)
         self.lock = threading.Lock()
-        self.lb = LoadBalancer(self.nodes)
-        pass
+        self.leader = is_leader
+        self.update_nodes_thread = threading.Thread(target=self.update_nodes)
+        self.update_nodes_thread.start()
 
     def pull(self, data):
         node_index = self.lb.get_rr_node()*2
@@ -51,8 +47,9 @@ class Application:
             # todo: in case the gateway restarts, it needs to read this list from a file at startup
             broker = {'ip': address, 'partition': partition, 'replica': replica}
             self.nodes.append(broker)
-            with open('ip_table', 'w') as file:
-                json.dump(self.nodes, file)
+            if self.leader:
+                with open('ip_table', 'w') as file:
+                    json.dump(self.nodes, file)
             if replica > 0:
                 requests.post('http://{}:5000/broker/replica'.format(self.nodes[partition * 2]['ip']), json=broker)
             return broker
@@ -72,10 +69,42 @@ class Application:
             return response
         except requests.exceptions.RequestException as e:
             # pass
-            logging.warning("partition leader is unreachable, promoting replica to leader")
+            logging.warning("partition leader is unreachable. node: {}".format(node))
             self.promote_replica(node_index)
             return self.send_request_to_broker(node_index, method, data)
 
     def promote_replica(self, node_index):
+        if not self.leader:
+            return
+        logging.warning("promoting replica: {}".format(self.nodes[node_index]))
         self.nodes[node_index] = self.nodes[node_index + 1]
         self.nodes[node_index]['replica'] = 0
+
+    def load_file(self):
+        try:
+            with open('ip_table', 'r') as file:
+                nodes = json.load(file)
+                logging.info("nodes: {}".format(nodes))
+                return nodes
+        except FileNotFoundError as e:
+            logging.error("ip_table file not found: {}".format(e))
+            return []
+
+    def update_nodes(self):
+        while True:
+            sleep(5)
+            if self.leader:
+                # overwrite the ip_table
+                try:
+                    with open('ip_table', 'w') as file:
+                        json.dump(self.nodes, file)
+                except Exception as e:
+                    logging.error("error updating the ip_table: {}".format(e))
+            else:
+                # read the ip_table
+                try:
+                    with open('ip_table', 'r') as file:
+                        self.nodes = json.load(file)
+                        self.lb = LoadBalancer(self.nodes.copy())
+                except Exception as e:
+                    logging.error("ip_table file not found: {}".format(e))

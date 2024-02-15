@@ -5,9 +5,25 @@ services:
       dockerfile: Dockerfile
     hostname: server
     stop_signal: SIGINT
+    command: python main.py leader 4000 4005
     ports:
       - "4000:4000"
       - "4005:4005"
+    volumes:
+      - ./server:/server
+  server2:
+    deploy:
+      mode: replicated
+      replicas: 0
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    hostname: server
+    stop_signal: SIGINT
+    command: python main.py follower 4001 4006
+    ports:
+      - "4200-4210:4001"
+      - "4100-4110:4006"
     volumes:
       - ./server:/server
   broker:

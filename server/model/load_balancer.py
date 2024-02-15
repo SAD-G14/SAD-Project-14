@@ -21,5 +21,7 @@ class LoadBalancer:
 
     def get_rr_node(self):
         node = self.nodes[self.node_index % len(self.nodes)]
+        print("nodes: {}".format(self.nodes))
+        print("index: {}".format(self.node_index))
         self.node_index = (self.node_index + 1) % len(self.nodes)
         return node

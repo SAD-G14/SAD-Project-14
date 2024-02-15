@@ -6,7 +6,7 @@ import logging
 from broker.data.message_request import MessageRequest
 from broker.application import broker
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARN)
 
 app = Flask(__name__)
 
